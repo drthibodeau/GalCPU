@@ -1,0 +1,145 @@
+%SIGNAL
+PIN   8 =  a0 
+PIN   7 =  a1 
+PIN   6 =  a2 
+PIN   5 =  a3 
+PIN  16 =  a_out0 
+PIN  18 =  a_out1 
+PIN  20 =  a_out2 
+PIN  22 =  a_out3 
+PIN   4 =  b0 
+PIN   3 =  b1 
+PIN   2 =  b2 
+PIN   1 =  b3 
+PIN  15 =  b_out0 
+PIN  17 =  b_out1 
+PIN  19 =  b_out2 
+PIN  21 =  b_out3 
+PIN   9 =  c0 
+PIN  10 =  c1 
+PIN  11 =  c2 
+PIN  13 =  c3 
+PIN  14 =  ls_in 
+PIN  23 =  rs_in 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+a_out0 =>
+    a0 & !c0 & !c1 & !c2 & !c3
+  # a0 & c0 & !c1 & !c2 & !c3
+  # !a0 & b0 & !c0 & c1 & !c2 & !c3
+  # a0 & !b0 & !c0 & c1 & !c2 & !c3
+  # a0 & c0 & c1 & !c2 & !c3
+  # b0 & c0 & c1 & !c2 & !c3
+  # a0 & b0 & !c0 & !c1 & c2 & !c3
+  # c0 & !c1 & c2 & !c3
+  # !c0 & c1 & c2 & !c3
+  # c0 & !c1 & c2 & c3 & ls_in
+  # a1 & c1 & c2 & c3
+
+a_out1 =>
+    a1 & !c0 & !c1 & !c2 & !c3
+  # a1 & c0 & !c1 & !c2 & !c3
+  # !a1 & b1 & !c0 & c1 & !c2 & !c3
+  # a1 & !b1 & !c0 & c1 & !c2 & !c3
+  # a1 & c0 & c1 & !c2 & !c3
+  # b1 & c0 & c1 & !c2 & !c3
+  # a1 & b1 & !c0 & !c1 & c2 & !c3
+  # !c0 & c1 & c2 & !c3
+  # a0 & !c1 & c2 & c3
+  # a2 & c1 & c2 & c3
+
+a_out2 =>
+    a2 & !c0 & !c1 & !c2 & !c3
+  # a2 & c0 & !c1 & !c2 & !c3
+  # !a2 & b2 & !c0 & c1 & !c2 & !c3
+  # a2 & !b2 & !c0 & c1 & !c2 & !c3
+  # a2 & c0 & c1 & !c2 & !c3
+  # b2 & c0 & c1 & !c2 & !c3
+  # a2 & b2 & !c0 & !c1 & c2 & !c3
+  # !c0 & c1 & c2 & !c3
+  # a1 & !c1 & c2 & c3
+  # a3 & c1 & c2 & c3
+
+a_out3 =>
+    a3 & !c0 & !c1 & !c2 & !c3
+  # a3 & c0 & !c1 & !c2 & !c3
+  # !a3 & b3 & !c0 & c1 & !c2 & !c3
+  # a3 & !b3 & !c0 & c1 & !c2 & !c3
+  # a3 & c0 & c1 & !c2 & !c3
+  # b3 & c0 & c1 & !c2 & !c3
+  # a3 & b3 & !c0 & !c1 & c2 & !c3
+  # !c0 & c1 & c2 & !c3
+  # a2 & !c1 & c2 & c3
+  # c1 & c2 & c3 & rs_in
+
+b_out0 =>
+    b0 & !c0 & !c1 & !c2 & !c3
+  # !b0 & c0 & !c1 & !c2 & !c3
+  # b0 & c0 & !c1 & c2 & !c3
+  # b0 & !c0 & c1 & c2 & !c3
+  # b0 & c0 & c1 & c2 & !c3
+  # c0 & !c1 & !c2 & c3 & ls_in
+  # b1 & c1 & !c2 & c3
+
+b_out1 =>
+    b1 & !c0 & !c1 & !c2 & !c3
+  # !b1 & c0 & !c1 & !c2 & !c3
+  # b1 & c0 & !c1 & c2 & !c3
+  # b1 & !c0 & c1 & c2 & !c3
+  # b1 & c0 & c1 & c2 & !c3
+  # b0 & !c1 & !c2 & c3
+  # b2 & c1 & !c2 & c3
+
+b_out2 =>
+    b2 & !c0 & !c1 & !c2 & !c3
+  # !b2 & c0 & !c1 & !c2 & !c3
+  # b2 & c0 & !c1 & c2 & !c3
+  # b2 & !c0 & c1 & c2 & !c3
+  # b2 & c0 & c1 & c2 & !c3
+  # b1 & !c1 & !c2 & c3
+  # b3 & c1 & !c2 & c3
+
+b_out3 =>
+    b3 & !c0 & !c1 & !c2 & !c3
+  # !b3 & c0 & !c1 & !c2 & !c3
+  # b3 & c0 & !c1 & c2 & !c3
+  # b3 & !c0 & c1 & c2 & !c3
+  # b3 & c0 & c1 & c2 & !c3
+  # b2 & !c1 & !c2 & c3
+  # c1 & !c2 & c3 & rs_in
+
+a_out0.oe  =>
+    1 
+
+a_out1.oe  =>
+    1 
+
+a_out2.oe  =>
+    1 
+
+a_out3.oe  =>
+    1 
+
+b_out0.oe  =>
+    1 
+
+b_out1.oe  =>
+    1 
+
+b_out2.oe  =>
+    1 
+
+b_out3.oe  =>
+    1 
+
+ls_in.oe  =>
+    0 
+
+rs_in.oe  =>
+    0 
+
+%END

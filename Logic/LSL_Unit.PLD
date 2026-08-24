@@ -1,0 +1,216 @@
+Name     LSL_Unit;
+PartNo   01;
+Date     8/17/26;
+Revision 02;
+Designer David Thibodeau;
+Company  Home;
+Assembly None;
+Location Canada;
+Device   G22V10;
+
+
+/* Differences between high and low logic unit code: 
+   INC command - High unit alway outputs x0 while Low unit outputs x1. 
+   Left Shift - left shifts on the low unit use c0 to select ls_in (rotate)
+                or zero (shift). The high unit always selects ls_in.
+   Right Shift - right shifts on the high unit use c0 to select rs_in (rotate)
+                or zero (shift). The low unit always selects rs_in.
+*/
+   
+
+/* High and low units require a 2-1 mux to do 8 bit shifts/rotates for both a and b inputs
+   the select pin for the mux can be controlled by the c2 control line. The inputs to the 
+   mux are a3/b3 from the low unit and a0/b0 from the high unit. For the 74x157 we want the
+   low c2 to select b inputs, which we means the b data is wired to the mux "a" inputs    
+*/
+
+
+/* For the current design the b inputs are from the D bus and the a inputs are from
+   the L bus 
+*/
+
+
+/* Inputs:
+a(0..3) = a inputs 
+b(0..3) = b inputs
+c(0..3) = output control bits
+a_out(0..3)  = a side outputs 
+b_out(0..3)  = b side outputs 
+ls_in = left shift in
+rs_in = right shift in 
+*/
+
+
+
+/* 4 bit control 
+
+0000: a_out = a, b_out = b  (no change, for adding)
+0001: a_out = a, b_out = not(b)  (for subtracting, carry in used for two's comp)
+
+0010: a_out = xor(a,b), b_out = 0000 (exclusive or)
+0011: a_out = or(a,b), b_out = 0000  (or, output on 'a' to reduce product terms for 'b')  
+0100: a_out = and(a,b), b_out = 0000 (and, bit test)
+
+0101: a_out = 0001, b_out = b (inc)
+0110: a_out = 1111, b_out = b (dec)
+
+0111: a_out = 0000, b_out = b (lda, ldx, ldy)
+
+1000: a_out = 0000, b_out = ASL (arithmetic shift left) b
+1001: a_out = 0000, b_out = ROL (rotate left) b
+1010: a_out = 0000, b_out = LSR (logical shift right) b
+1011: a_out = 0000, b_out = ROR (rotate right) b
+
+1100: b_out = 0000, a_out = ASL (arithmetic shift left) a
+1101: b_out = 0000, a_out = ROL (rotate left) a
+1110: b_out = 0000, a_out = LSR (logical shift right) a
+1111: b_out = 0000, a_out = ROR (rotate right) a
+
+*/
+
+
+
+/* *************** INPUT PINS ******************** */
+PIN [1..4] = [b3..b0];
+PIN [5..8] = [a3..a0];
+PIN [9..11] = [c0..c2];
+PIN 13 = c3;
+pin 23 = rs_in;  /* a0/b0 output from mux */ 
+PIN 14 = ls_in;  /* carry flag */
+ 
+
+/* *************** OUTPUT PINS ******************** */
+/* this pinout seems to help with wiring to the adder, at least on a breadboard */
+PIN 22 = a_out3;
+PIN 21 = b_out3;
+PIN 20 = a_out2;
+PIN 19 = b_out2;
+PIN 18 = a_out1;
+PIN 17 = b_out1;
+PIN 16 = a_out0;
+PIN 15 = b_out0;
+
+
+
+/* ************* output control = 0000 ************* */
+
+a_out0 = (!c3 & !c2 & !c1 & !c0) & a0;
+a_out1 = (!c3 & !c2 & !c1 & !c0) & a1;
+a_out2 = (!c3 & !c2 & !c1 & !c0) & a2;
+a_out3 = (!c3 & !c2 & !c1 & !c0) & a3;
+ 
+b_out0 = (!c3 & !c2 & !c1 & !c0) & b0;
+b_out1 = (!c3 & !c2 & !c1 & !c0) & b1;
+b_out2 = (!c3 & !c2 & !c1 & !c0) & b2;
+b_out3 = (!c3 & !c2 & !c1 & !c0) & b3;
+ 
+
+
+/* ************* output control = 0001 ************* */
+
+append a_out0 = (!c3 & !c2 & !c1 & c0) & a0;
+append a_out1 = (!c3 & !c2 & !c1 & c0) & a1;
+append a_out2 = (!c3 & !c2 & !c1 & c0) & a2;
+append a_out3 = (!c3 & !c2 & !c1 & c0) & a3;
+ 
+append b_out0 = (!c3 & !c2 & !c1 & c0) & !b0;
+append b_out1 = (!c3 & !c2 & !c1 & c0) & !b1;
+append b_out2 = (!c3 & !c2 & !c1 & c0) & !b2;
+append b_out3 = (!c3 & !c2 & !c1 & c0) & !b3;
+ 
+
+
+/* ************* XOR output control = 0010 (b outputs x0) ************ */
+
+append a_out0 = (!c3 & !c2 & c1 & !c0) & (a0 $ b0);
+append a_out1 = (!c3 & !c2 & c1 & !c0) & (a1 $ b1);
+append a_out2 = (!c3 & !c2 & c1 & !c0) & (a2 $ b2);
+append a_out3 = (!c3 & !c2 & c1 & !c0) & (a3 $ b3);
+ 
+
+
+/* ************* OR output control = 0011 (a outputs x0) ************* */
+append a_out0 = (!c3 & !c2 & c1 & c0) & (a0 # b0);
+append a_out1 = (!c3 & !c2 & c1 & c0) & (a1 # b1);
+append a_out2 = (!c3 & !c2 & c1 & c0) & (a2 # b2);
+append a_out3 = (!c3 & !c2 & c1 & c0) & (a3 # b3);
+
+
+
+/* ************* AND output control = 0100 (b outputs x0) ************* */
+
+append a_out0 = (!c3 & c2 & !c1 & !c0) & (a0 & b0);
+append a_out1 = (!c3 & c2 & !c1 & !c0) & (a1 & b1);
+append a_out2 = (!c3 & c2 & !c1 & !c0) & (a2 & b2);
+append a_out3 = (!c3 & c2 & !c1 & !c0) & (a3 & b3);
+
+
+
+/* ************* INC output control = 0101 (a0 = 1) ************* */
+
+/* for Low Unit: a0 = 1 */
+append a_out0 = (!c3 & c2 & !c1 & c0);
+
+append b_out0 = (!c3 & c2 & !c1 & c0) & b0;
+append b_out1 = (!c3 & c2 & !c1 & c0) & b1;
+append b_out2 = (!c3 & c2 & !c1 & c0) & b2;
+append b_out3 = (!c3 & c2 & !c1 & c0) & b3;
+ 
+
+
+/* ************* DEC output control = 0110 (a = xF) ************* */
+/* with new design the bus can output a = xF  */
+append a_out0 = (!c3 & c2 & c1 & !c0); 
+append a_out1 = (!c3 & c2 & c1 & !c0);
+append a_out2 = (!c3 & c2 & c1 & !c0);
+append a_out3 = (!c3 & c2 & c1 & !c0);
+
+append b_out0 = (!c3 & c2 & c1 & !c0) & b0;
+append b_out1 = (!c3 & c2 & c1 & !c0) & b1;
+append b_out2 = (!c3 & c2 & c1 & !c0) & b2;
+append b_out3 = (!c3 & c2 & c1 & !c0) & b3;
+
+
+
+/* ************* output control = 0111 (a outputs x0) ************* */
+append b_out0 = (!c3 & c2 & c1 & c0) & b0;
+append b_out1 = (!c3 & c2 & c1 & c0) & b1;
+append b_out2 = (!c3 & c2 & c1 & c0) & b2;
+append b_out3 = (!c3 & c2 & c1 & c0) & b3;
+
+
+
+/* ************* output control = 1000 or 1001 (ASL or ROL b, a_out = x0) ************* */
+/* using the c0 to select the carry flag */
+append b_out0 = (c3 & !c2 & !c1 & c0) & ls_in;
+append b_out1 = (c3 & !c2 & !c1) & b0;
+append b_out2 = (c3 & !c2 & !c1) & b1;
+append b_out3 = (c3 & !c2 & !c1) & b2;
+
+
+
+/* ************* output control = 1010 or 1011 (LSR or ROR b, a_out = x0) ************* */
+append b_out0 = (c3 & !c2 & c1) & b1;
+append b_out1 = (c3 & !c2 & c1) & b2;
+append b_out2 = (c3 & !c2 & c1) & b3;
+append b_out3 = (c3 & !c2 & c1) & rs_in;
+
+
+
+/* new rotate/shift operations on A */
+
+/* ************* output control = 1100 or 1101 (ASL or ROL a, b_out = x0) ************* */
+/* using the c0 to select the carry flag */
+append a_out0 = (c3 & c2 & !c1 & c0) & ls_in;
+append a_out1 = (c3 & c2 & !c1) & a0;
+append a_out2 = (c3 & c2 & !c1) & a1;
+append a_out3 = (c3 & c2 & !c1) & a2;
+
+
+
+/* ************* output control = 1110 or 1111 (LSR or ROR a, b_out = x0) ************* */
+append a_out0 = (c3 & c2 & c1) & a1;
+append a_out1 = (c3 & c2 & c1) & a2;
+append a_out2 = (c3 & c2 & c1) & a3;
+append a_out3 = (c3 & c2 & c1) & rs_in;
+
