@@ -1,0 +1,88 @@
+%SIGNAL
+PIN   9 =  I0 
+PIN  10 =  I1 
+PIN  15 =  a7_s 
+PIN  17 =  add_c 
+PIN  11 =  b0 
+PIN  13 =  b6 
+PIN  14 =  b7 
+PIN  16 =  b7_s 
+PIN  18 =  c_flag 
+PIN  21 =  n_flag 
+PIN  23 =  o_flag 
+PIN   8 =  q0 
+PIN   7 =  q1 
+PIN   6 =  q2 
+PIN   5 =  q3 
+PIN   4 =  q4 
+PIN   3 =  q5 
+PIN   2 =  q6 
+PIN   1 =  q7 
+PIN  22 =  u_flag 
+PIN  20 =  v_flag 
+PIN  19 =  z_flag 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+c_flag =>
+    !I0 & !I1 & add_c
+  # !I0 & I1 & b7
+  # I0 & I1 & b0
+
+n_flag =>
+    !I0 & !I1 & q7
+  # I0 & !I1 & b7
+  # !I0 & I1 & q7
+  # I0 & I1 & q7
+
+o_flag =>
+    !I0 & !I1 & a7_s & !b7_s & !q7
+
+u_flag =>
+    !I0 & !I1 & !a7_s & b7_s & q7
+
+v_flag =>
+    !I0 & !I1 & a7_s & b7_s & !q7
+  # !I0 & !I1 & !a7_s & !b7_s & q7
+  # I0 & !I1 & b6
+
+z_flag =>
+    !I0 & !I1 & !q0 & !q1 & !q2 & !q3 & !q4 & !q5 & !q6 & !q7
+  # I0 & !I1 & !q0 & !q1 & !q2 & !q3 & !q4 & !q5 & !q6 & !q7
+  # !I0 & I1 & !q0 & !q1 & !q2 & !q3 & !q4 & !q5 & !q6 & !q7
+  # I0 & I1 & !q0 & !q1 & !q2 & !q3 & !q4 & !q5 & !q6 & !q7
+
+a7_s.oe  =>
+    0 
+
+add_c.oe  =>
+    0 
+
+b7.oe  =>
+    0 
+
+b7_s.oe  =>
+    0 
+
+c_flag.oe  =>
+    1 
+
+n_flag.oe  =>
+    1 
+
+o_flag.oe  =>
+    1 
+
+u_flag.oe  =>
+    1 
+
+v_flag.oe  =>
+    1 
+
+z_flag.oe  =>
+    1 
+
+%END

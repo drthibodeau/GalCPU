@@ -1,0 +1,117 @@
+Name     flag_decode_unit;
+PartNo   01;
+Date     3/20/23;
+Revision 02;
+Designer David Thibodeau;
+Company  Home;
+Assembly None;
+Location Canada;
+Device   G22V10;
+
+
+
+/* 
+
+This device generates the flags for the status register based on the ALU output, A/B inputs and the a 
+2 bit input control:
+
+00: normal flag outputs
+01: bit operation
+10: left shift operation
+11: right shift operation
+
+*/
+
+
+
+/* *************** INPUT PINS ******************** */
+PIN [1..8] = [q7..q0]; /* outputs from adder */
+pin [9..10] = [I0..I1]; /* control signals */
+
+PIN [11] = b0;    /* b0 input to the logic unit */
+PIN [13] = b6;    /* b6 input to the logic unit */
+PIN [14] = b7;    /* b7 input to the logic unit */
+PIN [15] = a7_s;  /* a7 input to adder */
+PIN [16] = b7_s;  /* b7 input to adder */
+PIN [17] = add_c; /* adder carry out */
+
+
+/* *************** OUTPUT PINS ******************** */
+PIN [18] = c_flag;
+PIN [19] = z_flag;
+PIN [20] = v_flag;
+PIN [21] = n_flag;
+
+/* to dec PC high byte during branch: unsigned number + signed number undeflows  */
+PIN [22] = u_flag; 
+
+/* to inc PC high byte during branch: unsigned number + signed number overflows */ 
+PIN [23] = o_flag;
+
+
+
+/* ************* output control = 00 ************* */
+/* standard flags:
+	c_flag = adder carry out
+	n_flag = q7 (MSB of adder output)
+	z_flag = q is 0
+	v_flag = (a* + b* > 127) or (a* + b* < -128) (assuming signed 8-bit numbers)	
+	u_flag = a* + b* < 0 (b* is a signed number)
+	o_flag = a* + b* > 255  (b* is a signed number)
+*/
+
+c_flag = (!I1 & !I0) & add_c;
+n_flag = (!I1 & !I0) & q7;
+z_flag = (!I1 & !I0) & !q0 & !q1 & !q2 & !q3 & !q4 & !q5 & !q6 & !q7;
+v_flag = (!I1 & !I0) & ( (!a7_s & !b7_s & q7) # (a7_s & b7_s & !q7) );
+u_flag = (!I1 & !I0) & !a7_s & b7_s & q7;
+o_flag = (!I1 & !I0) & a7_s & !b7_s & !q7;
+
+
+
+/* ************* output control = 01 ************* */
+/* bit operation
+	n_flag = b7 
+	z_flag = q is 0
+	v_flag = b6	
+
+CPU operation: BIT
+*/
+
+APPEND n_flag = (!I1 & I0) & b7;
+APPEND z_flag = (!I1 & I0) & !q0 & !q1 & !q2 & !q3 & !q4 & !q5 & !q6 & !q7;
+APPEND v_flag = (!I1 & I0) & b6;
+
+
+
+/* ************* output control = 10 ************* */
+/* left shift operation
+	n_flag = q7 
+	z_flag = q is 0
+	c_flag = b7	
+
+CPU operations: ASL, ROL
+*/
+
+APPEND n_flag = (I1 & !I0) & q7;
+APPEND z_flag = (I1 & !I0) & !q0 & !q1 & !q2 & !q3 & !q4 & !q5 & !q6 & !q7;
+APPEND c_flag = (I1 & !I0) & b7;
+
+
+
+/* ************* output control = 11 ************* */
+/* right shift operation
+	n_flag = q7 
+	z_flag = q is 0
+	c_flag = b0	
+
+CPU operations: LSR, ROR
+*/
+
+APPEND n_flag = (I1 & I0) & q7;
+APPEND z_flag = (I1 & I0) & !q0 & !q1 & !q2 & !q3 & !q4 & !q5 & !q6 & !q7;
+APPEND c_flag = (I1 & I0) & b0;
+
+
+
+
