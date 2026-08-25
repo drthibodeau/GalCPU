@@ -2,7 +2,7 @@
 
 out_file="test.bin" 
 
-in_file="./LSL_Unit.jed"
+in_file="./Flags/flag_decode_unit.jed"
 
 device="GAL22V10D"
 
